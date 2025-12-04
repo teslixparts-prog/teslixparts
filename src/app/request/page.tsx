@@ -13,6 +13,7 @@ export default function RequestPage() {
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
   const [comment, setComment] = useState("");
+  const [showThanks, setShowThanks] = useState(false);
 
   const positionsText = useMemo(() => {
     return items
@@ -48,6 +49,10 @@ export default function RequestPage() {
           mailSubject: "Заявка з сайту TeslixParts",
           mailBody: (n: string, p: string, c: string, pos: string, sum: number, comm: string) =>
             `Ім'я: ${n}\nТелефон: ${p}\nМісто: ${c}\n\nПозиції:\n${pos}\n\nРазом: ${sum}₴\n\nКоментар: ${comm}`,
+          thanksTitle: "Дякуємо за замовлення!",
+          thanksText:
+            "Наш менеджер зв'яжеться з вами найближчим часом для підтвердження замовлення та уточнення деталей доставки.",
+          thanksCta: "На головну",
         }
       : {
           title: "Оформление заказа",
@@ -67,19 +72,41 @@ export default function RequestPage() {
           mailSubject: "Заявка с сайта TeslixParts",
           mailBody: (n: string, p: string, c: string, pos: string, sum: number, comm: string) =>
             `Имя: ${n}\nТелефон: ${p}\nГород: ${c}\n\nПозиции:\n${pos}\n\nИтого: ${sum}₴\n\nКомментарий: ${comm}`,
+          thanksTitle: "Спасибо за ваш заказ!",
+          thanksText:
+            "Наш менеджер свяжется с вами в ближайшее время для подтверждения заказа и уточнения деталей доставки.",
+          thanksCta: "На главную",
         };
 
-  const mailto = useMemo(() => {
-    const subject = encodeURIComponent(ui.mailSubject);
-    const body = encodeURIComponent(ui.mailBody(name, phone, city, positionsText, total, comment));
-    return `mailto:teslixparts@gmail.com?subject=${subject}&body=${body}`;
-  }, [name, phone, city, positionsText, comment, total, ui]);
+  const mailBodyText = useMemo(
+    () => ui.mailBody(name, phone, city, positionsText, total, comment),
+    [name, phone, city, positionsText, comment, total, ui]
+  );
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    window.location.href = mailto;
-    clear();
-    router.push("/");
+
+    try {
+      const res = await fetch("/api/order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: mailBodyText,
+        }),
+      });
+
+      if (!res.ok) {
+        alert("Не удалось отправить заявку. Попробуйте ещё раз или свяжитесь с нами напрямую.");
+        return;
+      }
+
+      clear();
+      setShowThanks(true);
+    } catch {
+      alert("Произошла ошибка при отправке заявки. Попробуйте ещё раз чуть позже.");
+    }
   };
 
   return (
@@ -146,6 +173,37 @@ export default function RequestPage() {
           </div>
         </form>
       </div>
+
+      {showThanks && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="relative w-full max-w-md rounded-2xl border border-zinc-700 bg-zinc-900/95 p-6 text-sm text-zinc-100 shadow-xl shadow-black/60">
+            <button
+              type="button"
+              onClick={() => {
+                setShowThanks(false);
+                router.push("/");
+              }}
+              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border border-zinc-700 text-xs text-zinc-300 transition hover:border-zinc-500 hover:bg-zinc-800 hover:text-zinc-50"
+            >
+              ✕
+            </button>
+            <h2 className="pr-8 text-lg font-semibold text-pink-200 drop-shadow-[0_0_14px_rgba(244,114,182,0.4)]">
+              {ui.thanksTitle}
+            </h2>
+            <p className="mt-3 text-sm text-zinc-300">{ui.thanksText}</p>
+            <button
+              type="button"
+              onClick={() => {
+                setShowThanks(false);
+                router.push("/");
+              }}
+              className="mt-5 inline-flex items-center justify-center rounded-full bg-white px-5 py-2 text-sm font-semibold text-black shadow-sm shadow-pink-200/40 transition hover:bg-zinc-200"
+            >
+              {ui.thanksCta}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

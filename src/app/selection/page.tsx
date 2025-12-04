@@ -48,16 +48,34 @@ export default function SelectionRequestPage() {
             `Марка: ${b}\nМодель: ${m}\nТелефон: ${p}\nФИО: ${f}\nE-mail: ${e}\n\nДополнительная информация:\n${x}`,
         };
 
-  const mailto = useMemo(() => {
-    const subject = encodeURIComponent(ui.subject);
-    const body = encodeURIComponent(ui.mailBody(brand, model, phone, fullName, email, extra));
-    return `mailto:teslixparts@gmail.com?subject=${subject}&body=${body}`;
-  }, [brand, model, phone, fullName, email, extra, ui]);
+  const messageText = useMemo(
+    () => ui.mailBody(brand, model, phone, fullName, email, extra),
+    [brand, model, phone, fullName, email, extra, ui],
+  );
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    window.location.href = mailto;
-    router.push("/");
+
+    try {
+      const res = await fetch("/api/order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: `Заявка на подбор запчастей (VIN)\n\n${messageText}`,
+        }),
+      });
+
+      if (!res.ok) {
+        alert("Не удалось отправить заявку. Попробуйте ещё раз или напишите нам напрямую.");
+        return;
+      }
+
+      router.push("/");
+    } catch {
+      alert("Произошла ошибка при отправке заявки. Попробуйте ещё раз чуть позже.");
+    }
   };
 
   return (
