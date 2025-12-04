@@ -100,10 +100,10 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="mt-16 rounded-2xl border border-зinc-800 bg-зinc-950/60 p-6">
+        <section className="mt-16 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-6">
           <h2 className="text-2xl font-semibold">{t.vinTitle}</h2>
           <p className="mt-3 max-w-2xl text-sm text-zinc-300">
-            {t.vинDescription}
+            {t.vinDescription}
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <Link
@@ -113,7 +113,7 @@ export default function Home() {
               {t.vinButton}
             </Link>
             <p className="text-xs text-zinc-400">
-              {t.vинHint}
+              {t.vinHint}
             </p>
           </div>
         </section>
