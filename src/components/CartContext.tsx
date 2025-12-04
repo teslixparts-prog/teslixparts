@@ -32,7 +32,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (raw) {
         const parsed = JSON.parse(raw) as CartItem[];
         if (Array.isArray(parsed)) {
-          setItems(parsed);
+          // Не затираем уже добавленные в эту сессию товары, только дополняем
+          setItems((prev) => {
+            if (!prev || prev.length === 0) return parsed;
+            const existingIds = new Set(prev.map((i) => i.productId));
+            const merged = [
+              ...prev,
+              ...parsed.filter((i) => !existingIds.has(i.productId)),
+            ];
+            return merged;
+          });
         }
       }
     } catch {
