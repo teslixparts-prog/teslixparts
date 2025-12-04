@@ -1,8 +1,11 @@
-import { PrismaClient } from "@prisma/client";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
+import prismaPkg from "@prisma/client";
 
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+// Fallback-safe extraction of PrismaClient from the default export
+const { PrismaClient } = prismaPkg as any;
+
+const globalForPrisma = globalThis as any;
 
 function createPrismaClient() {
 	const connectionString = process.env.DATABASE_URL;
