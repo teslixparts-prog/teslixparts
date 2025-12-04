@@ -8,7 +8,7 @@ export async function GET() {
 		});
 
 		const normalized = products.map((p: (typeof products)[number]) => ({
-			id: p.id,
+			id: String(p.id),
 			title: p.title,
 			description: p.description,
 			price: p.price,
