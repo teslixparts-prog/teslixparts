@@ -244,12 +244,16 @@ export default function AdminPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-400">Наличие (В наличии / На заказ)</label>
-                <input
+                <label className="block text-xs text-zinc-400">Наличие</label>
+                <select
                   value={form.availability}
                   onChange={(e) => setForm({ ...form, availability: e.target.value })}
-                  className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 outline-none focus:border-zinc-600"
-                />
+                  className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-sm outline-none focus:border-zinc-600"
+                >
+                  <option value="">Выберите статус</option>
+                  <option value="В наличии">В наличии</option>
+                  <option value="На заказ">На заказ</option>
+                </select>
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">

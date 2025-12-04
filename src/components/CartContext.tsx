@@ -22,6 +22,7 @@ const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [products, setProducts] = useState<Product[]>(demoProducts);
 
   // Восстанавливаем корзину из localStorage при первом рендере на клиенте
   useEffect(() => {
@@ -56,7 +57,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clear = () => setItems([]);
 
-  const products = demoProducts;
+  // Загружаем товары из API, чтобы корзина работала с реальной БД
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch("/api/products");
+        if (!res.ok) return;
+        const data: Product[] = await res.json();
+        if (!cancelled && Array.isArray(data) && data.length > 0) {
+          setProducts(data);
+        }
+      } catch {
+        // если API недоступно, остаёмся на demoProducts
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const { total, totalCount } = useMemo(() => {
     let sum = 0;
