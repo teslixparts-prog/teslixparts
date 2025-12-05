@@ -75,7 +75,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const res = await fetch("/api/products", { cache: "no-store" });
         if (!res.ok) return;
         const data: Product[] = await res.json();
-        if (!cancelled && Array.isArray(data) && data.length > 0) {
+        if (!cancelled && Array.isArray(data)) {
           setProducts(data);
         }
       } catch {
@@ -87,6 +87,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
       cancelled = true;
     };
   }, []);
+
+  // Если в корзине есть товары, которых нет в текущем списке products — подгружаем ещё раз
+  useEffect(() => {
+    let cancelled = false;
+    const missing = items.some((it) => !products.find((p) => p.id === it.productId));
+    if (!missing) return;
+    (async () => {
+      try {
+        const res = await fetch("/api/products", { cache: "no-store" });
+        if (!res.ok) return;
+        const data: Product[] = await res.json();
+        if (!cancelled && Array.isArray(data)) {
+          setProducts(data);
+        }
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [items]);
 
   const { total, totalCount } = useMemo(() => {
     let sum = 0;

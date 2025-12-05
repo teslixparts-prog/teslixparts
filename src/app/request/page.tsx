@@ -87,6 +87,7 @@ export default function RequestPage() {
     e.preventDefault();
 
     try {
+      const productIds = items.map((i) => i.productId);
       const res = await fetch("/api/order", {
         method: "POST",
         headers: {
@@ -94,6 +95,7 @@ export default function RequestPage() {
         },
         body: JSON.stringify({
           message: mailBodyText,
+          productIds,
         }),
       });
 
