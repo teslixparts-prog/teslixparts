@@ -13,6 +13,8 @@ export default function CatalogPage() {
   const [modelOpen, setModelOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
+  const [page, setPage] = useState(1);
+  const pageSize = 12;
 
   const t =
     lang === "uk"
@@ -32,7 +34,7 @@ export default function CatalogPage() {
         };
 
   const filtered = useMemo(() => {
-    return products.filter((p) => {
+    const list = products.filter((p) => {
       const matchesQ = q
         ? (p.title + " " + p.description + " " + (p.oem || "") + " " + p.sku)
             .toLowerCase()
@@ -42,7 +44,18 @@ export default function CatalogPage() {
       const matchesCat = category ? p.tags.includes(category) : true;
       return matchesQ && matchesModel && matchesCat;
     });
+    return list;
   }, [q, model, category, products]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const current = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [q, model, category]);
 
   useEffect(() => {
     let cancelled = false;
@@ -172,11 +185,58 @@ export default function CatalogPage() {
         {filtered.length === 0 ? (
           <p className="mt-8 text-sm text-zinc-400">{t.empty}</p>
         ) : (
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((p) => (
-              <ProductCard key={p.id} p={p} />
-            ))}
-          </div>
+          <>
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {current.map((p) => (
+                <ProductCard key={p.id} p={p} />
+              ))}
+            </div>
+            {totalPages > 1 ? (
+              <div className="mt-10 flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  disabled={page === 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className={`rounded-full border px-3 py-1 text-sm ${
+                    page === 1
+                      ? "cursor-default border-zinc-800 text-zinc-600"
+                      : "border-zinc-700 text-zinc-200 hover:bg-zinc-900"
+                  }`}
+                >
+                  ‹
+                </button>
+                {Array.from({ length: totalPages }).map((_, idx) => {
+                  const n = idx + 1;
+                  return (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setPage(n)}
+                      className={`min-w-8 rounded-full border px-3 py-1 text-sm ${
+                        page === n
+                          ? "border-pink-400/50 bg-pink-500/10 text-pink-200"
+                          : "border-zinc-700 text-zinc-200 hover:bg-zinc-900"
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  );
+                })}
+                <button
+                  type="button"
+                  disabled={page === totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  className={`rounded-full border px-3 py-1 text-sm ${
+                    page === totalPages
+                      ? "cursor-default border-zinc-800 text-zinc-600"
+                      : "border-zinc-700 text-zinc-200 hover:bg-zinc-900"
+                  }`}
+                >
+                  ›
+                </button>
+              </div>
+            ) : null}
+          </>
         )}
       </div>
     </div>

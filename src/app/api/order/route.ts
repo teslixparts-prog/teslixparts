@@ -39,12 +39,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to send message" }, { status: 502 });
     }
 
-    // Помечаем товары как недоступные (уникальные, 1 шт.)
+    // Помечаем товары как забронированные (уникальные, 1 шт.)
     if (productIds.length > 0) {
       try {
         await prisma.product.updateMany({
           where: { id: { in: productIds } },
-          data: { availability: "На заказ" },
+          data: { availability: "Забронирован" },
         });
       } catch (e) {
         console.error("Failed to update product availability after order", e);

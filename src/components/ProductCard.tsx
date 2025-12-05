@@ -63,12 +63,18 @@ export default function ProductCard({ p }: { p: Product }) {
             className={`inline-flex items-center gap-2 rounded-md px-2 py-1 text-[11px] font-medium transition-transform transition-colors duration-150 hover:-translate-y-[1px] hover:text-zinc-100 ${
               p.availability === "В наличии"
                 ? "bg-emerald-500/3 text-emerald-200 ring-1 ring-emerald-500/10"
+                : p.availability === "Забронирован"
+                ? "bg-amber-500/10 text-amber-200 ring-1 ring-amber-500/20"
                 : "bg-red-500/3 text-red-200 ring-1 ring-red-500/10"
             }`}
           >
             <span
               className={`h-2 w-2 rounded-full ${
-                p.availability === "В наличии" ? "bg-emerald-200" : "bg-red-200"
+                p.availability === "В наличии"
+                  ? "bg-emerald-200"
+                  : p.availability === "Забронирован"
+                  ? "bg-amber-300"
+                  : "bg-red-200"
               }`}
             />
             {p.availability}
@@ -101,14 +107,20 @@ export default function ProductCard({ p }: { p: Product }) {
             }
             add(p.id);
           }}
-          disabled={inCart}
+          disabled={inCart || p.availability !== "В наличии"}
           className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold ${
-            inCart
+            inCart || p.availability !== "В наличии"
               ? "cursor-default bg-zinc-700 text-zinc-300"
               : "bg-white text-black hover:bg-zinc-200"
           }`}
         >
-          {inCart ? "Уже в корзине" : "В корзину"}
+          {inCart
+            ? "Уже в корзине"
+            : p.availability === "Забронирован"
+            ? "Забронировано"
+            : p.availability === "На заказ"
+            ? "Нет в наличии"
+            : "В корзину"}
         </button>
         <Link
           href="/cart"

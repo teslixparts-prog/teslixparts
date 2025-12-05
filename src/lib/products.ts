@@ -9,7 +9,7 @@ export type Product = {
   oem?: string;
   compatibility?: string; // e.g. "Model 3 2017–2023"
   condition?: "Новая" | "Б/У";
-  availability?: "В наличии" | "На заказ";
+  availability?: "В наличии" | "На заказ" | "Забронирован";
 };
 
 export const demoProducts: Product[] = [

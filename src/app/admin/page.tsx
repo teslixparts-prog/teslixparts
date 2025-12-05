@@ -655,28 +655,52 @@ export default function AdminPage() {
                           <div className="text-xs text-zinc-400">{p.id}</div>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          if (!confirm(t.confirmDelete(p.title))) return;
-                          try {
-                            const res = await fetch(`/api/admin/products?id=${encodeURIComponent(p.id)}`, {
-                              method: "DELETE",
-                              headers: { "x-admin-key": adminKey },
-                            });
-                            if (!res.ok && res.status !== 204) {
-                              const data = await res.json().catch(() => ({}));
-                              throw new Error(data?.error || (lang === "uk" ? "Помилка видалення" : "Ошибка удаления"));
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!confirm(lang === "uk" ? `Позначити як продано та видалити товар “${p.title}”?` : `Отметить как продано и удалить товар “${p.title}”?`)) return;
+                            try {
+                              const res = await fetch(`/api/admin/products?id=${encodeURIComponent(p.id)}`, {
+                                method: "DELETE",
+                                headers: { "x-admin-key": adminKey },
+                              });
+                              if (!res.ok && res.status !== 204) {
+                                const data = await res.json().catch(() => ({}));
+                                throw new Error(data?.error || (lang === "uk" ? "Помилка видалення" : "Ошибка удаления"));
+                              }
+                              setProducts((prev) => prev.filter((x) => x.id !== p.id));
+                            } catch (err: any) {
+                              alert(err?.message || (lang === "uk" ? "Помилка видалення" : "Ошибка удаления"));
                             }
-                            setProducts((prev) => prev.filter((x) => x.id !== p.id));
-                          } catch (err: any) {
-                            alert(err?.message || (lang === "uk" ? "Помилка видалення" : "Ошибка удаления"));
-                          }
-                        }}
-                        className="rounded-full border border-red-500/50 px-3 py-1 text-xs text-red-300 hover:bg-red-500/10"
-                      >
-                        {t.delete}
-                      </button>
+                          }}
+                          className="rounded-full border border-amber-500/50 px-3 py-1 text-xs text-amber-300 hover:bg-amber-500/10"
+                        >
+                          {lang === "uk" ? "Продано" : "Продано"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!confirm(t.confirmDelete(p.title))) return;
+                            try {
+                              const res = await fetch(`/api/admin/products?id=${encodeURIComponent(p.id)}`, {
+                                method: "DELETE",
+                                headers: { "x-admin-key": adminKey },
+                              });
+                              if (!res.ok && res.status !== 204) {
+                                const data = await res.json().catch(() => ({}));
+                                throw new Error(data?.error || (lang === "uk" ? "Помилка видалення" : "Ошибка удаления"));
+                              }
+                              setProducts((prev) => prev.filter((x) => x.id !== p.id));
+                            } catch (err: any) {
+                              alert(err?.message || (lang === "uk" ? "Помилка видалення" : "Ошибка удаления"));
+                            }
+                          }}
+                          className="rounded-full border border-red-500/50 px-3 py-1 text-xs text-red-300 hover:bg-red-500/10"
+                        >
+                          {t.delete}
+                        </button>
+                      </div>
                     </li>
                   ))}
                 </ul>
