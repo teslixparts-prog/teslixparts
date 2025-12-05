@@ -63,7 +63,7 @@ export default function AdminCarsPage() {
         const data: any[] = await res.json();
         if (!cancelled && Array.isArray(data)) {
           setCars(
-            data.map((c) => ({ id: String(c.id), make: c.make, model: c.model, year: Number(c.year || 0), images: Array.isArray(c.images) ? c.images : [] })),
+            data.map((c) => ({ id: String(c.id), make: c.make, model: c.model, year: Number(c.year || 0), vin: String(c.vin || ""), images: Array.isArray(c.images) ? c.images : [] })),
           );
         }
       } catch {}
