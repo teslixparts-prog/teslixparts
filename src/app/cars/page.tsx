@@ -72,6 +72,7 @@ export default function CarsPage() {
         {cars.length === 0 ? (
           <p className="mt-6 text-sm text-zinc-400">{tx.empty}</p>
         ) : (
+          <>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {cars.map((c) => (
               <div key={c.id} className="rounded-xl border border-zinc-800 bg-black/40 p-3">
@@ -171,6 +172,7 @@ export default function CarsPage() {
               </div>
             </div>
           ) : null}
+          </>
         )}
       </div>
     </div>
