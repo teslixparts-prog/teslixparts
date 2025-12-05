@@ -18,6 +18,10 @@ export default function Header() {
   const nav = [
     { href: "/", label: lang === "uk" ? "Головна" : "Главная" },
     { href: "/catalog", label: lang === "uk" ? "Каталог" : "Каталог" },
+    {
+      href: "/cars",
+      label: lang === "uk" ? "Авто під розбір" : "Авто под разбор",
+    },
     { href: "/delivery", label: lang === "uk" ? "Доставка" : "Доставка" },
     { href: "/payment", label: lang === "uk" ? "Оплата" : "Оплата" },
     { href: "/guarantee", label: lang === "uk" ? "Гарантія" : "Гарантия" },
@@ -67,12 +71,43 @@ export default function Header() {
               UA
             </button>
           </div>
+          {/* Mobile language toggle */}
+          <div className="flex items-center gap-1 rounded-full border border-zinc-700 bg-black/40 p-1 text-[10px] text-zinc-300 sm:hidden">
+            <button
+              type="button"
+              onClick={() => setLang("ru")}
+              className={`rounded-full px-2 py-0.5 ${
+                lang === "ru" ? "bg-pink-200 text-black" : "bg-transparent text-zinc-300 hover:text-white"
+              }`}
+            >
+              RU
+            </button>
+            <button
+              type="button"
+              onClick={() => setLang("uk")}
+              className={`rounded-full px-2 py-0.5 ${
+                lang === "uk" ? "bg-pink-200 text-black" : "bg-transparent text-zinc-300 hover:text-white"
+              }`}
+            >
+              UA
+            </button>
+          </div>
           <Link
             href="/cart"
             className="relative hidden items-center gap-2 rounded-full border border-zinc-700 px-3 py-1 text-sm text-zinc-200 hover:bg-zinc-900 sm:flex"
           >
             <span>{cartLabel}</span>
             <span className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-pink-200 px-2 text-xs font-semibold text-black shadow-md shadow-pink-300/40">
+              {totalCount}
+            </span>
+          </Link>
+          {/* Mobile cart pill, always visible */}
+          <Link
+            href="/cart"
+            className="relative inline-flex items-center gap-2 rounded-full border border-zinc-700 px-3 py-1 text-xs text-zinc-200 hover:bg-zinc-900 sm:hidden"
+          >
+            <span>{cartLabel}</span>
+            <span className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-pink-200 px-1.5 text-[10px] font-semibold text-black shadow-md shadow-pink-300/40">
               {totalCount}
             </span>
           </Link>

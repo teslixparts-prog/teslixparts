@@ -25,3 +25,18 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// Автомобили под разбор
+model Car {
+  id       String   @id @default(cuid())
+  make     String   // Марка (Tesla)
+  model    String   // Модель (Model 3, Model Y, Model S, Model X, Cybertruck)
+  year     Int      // Год выпуска
+  vin      String   // VIN код
+  mileage  Int?     // Пробег, км
+  images   String   // JSON-строка с массивом URL картинок
+  status   String   @default("В наличии") // "В наличии" | "В пути (возможно бронирование)"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

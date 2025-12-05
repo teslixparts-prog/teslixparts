@@ -153,7 +153,7 @@ export default function ProductCard({ p }: { p: Product }) {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-zinc-700 text-xs text-zinc-300 hover:bg-zinc-800"
+              className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-zinc-600 bg-black/60 text-base text-white shadow-md hover:bg-black/80"
             >
               ✕
             </button>
