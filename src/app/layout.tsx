@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
-import { useEffect } from "react";
-import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import "./globals.css";
@@ -10,6 +8,7 @@ import { CartProvider } from "@/components/CartContext";
 import Header from "@/components/Header";
 import WelcomeOverlay from "@/components/WelcomeOverlay";
 import { LanguageProvider } from "@/components/LanguageContext";
+import GtagRouteTracker from "@/components/GtagRouteTracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,17 +24,6 @@ export const metadata: Metadata = {
   title: "TeslixParts — Запчасти для Tesla",
   description: "Каталог запчастей для Tesla (Model 3/Y/X/S). Доставка из Польши в Украину своим перевозчиком. Оплата по реквизитам.",
 };
-
-function Analytics({ id }: { id: string }) {
-  const pathname = usePathname();
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!(window as any).gtag) return;
-    (window as any).gtag("config", id, { page_path: pathname });
-    (window as any).gtag("event", "page_view", { send_to: id });
-  }, [id, pathname]);
-  return null;
-}
 
 export default function RootLayout({
   children,
@@ -66,7 +54,7 @@ export default function RootLayout({
               <main className="flex-1">
                 {children}
               </main>
-              <Analytics id={adsId} />
+              <GtagRouteTracker id={adsId} />
               <footer className="border-t border-zinc-700 bg-black/50 px-4 py-4 text-center text-xs text-zinc-500 shadow-[0_-4px_12px_rgba(0,0,0,0.6)]">
                 <div className="flex flex-col items-center gap-1 sm:flex-row sm:justify-center sm:gap-4">
                 <span>
