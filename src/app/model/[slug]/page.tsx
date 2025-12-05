@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ProductCard from "@/components/ProductCard";
-import { categories, demoProducts, models } from "@/lib/products";
+import { categories, type Product } from "@/lib/products";
 import { useParams } from "next/navigation";
 
 export default function ModelPage() {
@@ -20,9 +20,25 @@ export default function ModelPage() {
 
   const [q, setQ] = useState("");
   const [category, setCategory] = useState<string>("");
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/products", { cache: "no-store" });
+        if (!res.ok) return;
+        const data: Product[] = await res.json();
+        if (!cancelled && Array.isArray(data)) setProducts(data);
+      } catch {}
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filtered = useMemo(() => {
-    return demoProducts.filter((p) => {
+    return products.filter((p) => {
       const matchesModel = currentModel ? p.tags.includes(currentModel) : true;
       const matchesQ = q
         ? (p.title + " " + p.description + " " + (p.oem || "") + " " + p.sku)
@@ -32,7 +48,7 @@ export default function ModelPage() {
       const matchesCat = category ? p.tags.includes(category) : true;
       return matchesModel && matchesQ && matchesCat;
     });
-  }, [q, category, currentModel]);
+  }, [q, category, currentModel, products]);
 
   return (
     <div className="min-h-screen px-6 py-12 text-zinc-50">
