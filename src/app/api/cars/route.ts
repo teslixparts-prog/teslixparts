@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
@@ -14,10 +16,16 @@ export async function GET() {
       images: JSON.parse(c.images || "[]"),
       status: c.status,
     }));
-    return NextResponse.json(normalized);
+    return new NextResponse(JSON.stringify(normalized), {
+      status: 200,
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    });
   } catch (err: any) {
     console.error("/api/cars error", err);
     const message = (typeof err?.message === "string" && err.message) || (typeof err === "string" ? err : "Server error");
-    return NextResponse.json({ error: message }, { status: 500 });
+    return new NextResponse(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    });
   }
 }

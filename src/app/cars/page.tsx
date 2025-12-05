@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/components/LanguageContext";
 
 type Car = {
   id: string;
@@ -14,6 +15,7 @@ type Car = {
 };
 
 export default function CarsPage() {
+  const { lang } = useLanguage();
   const [cars, setCars] = useState<Car[]>([]);
   const [openId, setOpenId] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -22,7 +24,7 @@ export default function CarsPage() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/cars");
+        const res = await fetch("/api/cars", { cache: "no-store" });
         if (!res.ok) return;
         const data: Car[] = await res.json();
         if (!cancelled) setCars(data);
@@ -38,16 +40,37 @@ export default function CarsPage() {
   const gotoPrev = () => setCurrentIndex((i) => (i === 0 ? (selectedImages.length || 1) - 1 : i - 1));
   const gotoNext = () => setCurrentIndex((i) => (i === (selectedImages.length || 1) - 1 ? 0 : i + 1));
 
+  const tx =
+    lang === "uk"
+      ? {
+          title: "Авто під розбір",
+          subtitle: "Список авто, доступних під розбір.",
+          empty: "Поки немає автомобілів.",
+          vin: "VIN",
+          mileage: "Пробіг",
+          inStock: "В наявності",
+          onTheWay: "В дорозі (можливе бронювання)",
+          openGallery: "Відкрити галерею",
+        }
+      : {
+          title: "Автомобили под разбор",
+          subtitle: "Список автомобилей, доступных под разбор.",
+          empty: "Пока нет автомобилей.",
+          vin: "VIN",
+          mileage: "Пробег",
+          inStock: "В наличии",
+          onTheWay: "В пути (возможно бронирование)",
+          openGallery: "Открыть галерею",
+        };
+
   return (
     <div className="min-h-screen px-6 py-12 text-zinc-50">
       <div className="mx-auto max-w-6xl">
-        <h1 className="text-3xl font-semibold uppercase tracking-[0.15em] text-pink-200 drop-shadow-[0_0_14px_rgba(244,114,182,0.3)]">
-          Автомобили под разбор
-        </h1>
-        <p className="mt-2 text-sm text-zinc-400">Список автомобилей, доступных под разбор.</p>
+        <h1 className="text-3xl font-semibold uppercase tracking-[0.15em] text-pink-200 drop-shadow-[0_0_14px_rgba(244,114,182,0.3)]">{tx.title}</h1>
+        <p className="mt-2 text-sm text-zinc-400">{tx.subtitle}</p>
 
         {cars.length === 0 ? (
-          <p className="mt-6 text-sm text-zinc-400">Пока нет автомобилей.</p>
+          <p className="mt-6 text-sm text-zinc-400">{tx.empty}</p>
         ) : (
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {cars.map((c) => (
@@ -59,7 +82,7 @@ export default function CarsPage() {
                     setCurrentIndex(0);
                   }}
                   className="aspect-video w-full overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900"
-                  aria-label="Открыть галерею"
+                  aria-label={tx.openGallery}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -71,7 +94,7 @@ export default function CarsPage() {
                 <div className="mt-3 text-sm">
                   <div className="font-semibold text-zinc-100">{c.make} {c.model} • {c.year}</div>
                   <div className="mt-1 flex items-center justify-between gap-2 text-zinc-400">
-                    <span>VIN: {c.vin}</span>
+                    <span>{tx.vin}: {c.vin}</span>
                     {c.status ? (
                       <span
                         className={`inline-flex items-center gap-2 rounded-md px-2 py-1 text-[11px] font-medium ${
@@ -85,12 +108,12 @@ export default function CarsPage() {
                             c.status === "В наличии" ? "bg-emerald-300" : "bg-amber-300"
                           }`}
                         />
-                        {c.status}
+                        {lang === "uk" ? (c.status === "В наличии" ? tx.inStock : tx.onTheWay) : c.status}
                       </span>
                     ) : null}
                   </div>
                   {typeof c.mileage === "number" ? (
-                    <div className="text-zinc-400">Пробег: {c.mileage.toLocaleString()} км</div>
+                    <div className="text-zinc-400">{tx.mileage}: {c.mileage.toLocaleString()} км</div>
                   ) : null}
                 </div>
               </div>
