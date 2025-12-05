@@ -24,6 +24,7 @@ export default function AdminCarsPage() {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverTrash, setDragOverTrash] = useState(false);
   const [cars, setCars] = useState<Array<{ id: string; make: string; model: string; year: number; images: string[] }>>([]);
+  const [carsFilter, setCarsFilter] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -362,11 +363,29 @@ export default function AdminCarsPage() {
             {/* Список существующих авто */}
             <div className="mt-10 rounded-xl border border-zinc-800 bg-black/30 p-3">
               <div className="mb-2 text-sm font-semibold text-zinc-100">{lang === "uk" ? "Існуючі авто" : "Существующие авто"}</div>
-              {cars.length === 0 ? (
+              <input
+                value={carsFilter}
+                onChange={(e) => setCarsFilter(e.target.value)}
+                placeholder={lang === "uk" ? "Пошук: VIN / марка / модель / рік" : "Поиск: VIN / марка / модель / год"}
+                className="mb-2 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-xs outline-none focus:border-zinc-600"
+              />
+              {(
+                (carsFilter
+                  ? cars.filter((c) =>
+                      (`${c.vin || ""} ${c.make} ${c.model} ${c.year}`).toLowerCase().includes(carsFilter.toLowerCase()),
+                    )
+                  : cars
+                ).length === 0
+              ) ? (
                 <div className="text-xs text-zinc-400">{lang === "uk" ? "Поки немає авто." : "Пока нет авто."}</div>
               ) : (
                 <ul className="max-h-80 space-y-2 overflow-y-auto text-sm">
-                  {cars.map((c) => (
+                  {(carsFilter
+                    ? cars.filter((c) =>
+                        (`${c.vin || ""} ${c.make} ${c.model} ${c.year}`).toLowerCase().includes(carsFilter.toLowerCase()),
+                      )
+                    : cars
+                  ).map((c) => (
                     <li key={c.id} className="flex items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-900/40 px-3 py-2">
                       <div className="flex min-w-0 items-center gap-3">
                         {/* eslint-disable-next-line @next/next/no-img-element */}

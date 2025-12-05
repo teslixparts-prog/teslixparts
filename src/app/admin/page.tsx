@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState, type ChangeEvent } from "react";
+import { useLanguage } from "@/components/LanguageContext";
 import { categories, models } from "@/lib/products";
 
 const initialForm = {
@@ -15,11 +16,13 @@ const initialForm = {
 };
 
 export default function AdminPage() {
+  const { lang } = useLanguage();
   const [adminKey, setAdminKey] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [authed, setAuthed] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [products, setProducts] = useState<Array<{ id: string; title: string; price: number; images: string[] }>>([]);
+  const [productsFilter, setProductsFilter] = useState("");
   const [selectedModel, setSelectedModel] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [availableImages, setAvailableImages] = useState<string[]>([]);
@@ -46,14 +49,14 @@ export default function AdminPage() {
       });
 
       if (!res.ok) {
-        throw new Error("Неверный пароль");
+        throw new Error(lang === "uk" ? "Невірний пароль" : "Неверный пароль");
       }
 
       setAuthed(true);
       setAdminKey(loginPassword);
-      setMessage("Вход выполнен, можно добавлять товары");
+      setMessage(lang === "uk" ? "Вхід виконано, можна додавати товари" : "Вход выполнен, можно добавлять товары");
     } catch (err: any) {
-      setError(err.message || "Ошибка авторизации");
+      setError(err.message || (lang === "uk" ? "Помилка авторизації" : "Ошибка авторизации"));
     } finally {
       setLoading(false);
     }
@@ -287,23 +290,100 @@ export default function AdminPage() {
     }
   };
 
+  const t =
+    lang === "uk"
+      ? {
+          adminTitle: "Адмін: товари",
+          adminDesc: "Закрита сторінка для додавання товарів до каталогу.",
+          loginTitle: "Вхід до адмінки",
+          loginHint: "Введіть адмін‑пароль.",
+          password: "Пароль",
+          loginBtn: "Увійти",
+          checking: "Перевіряємо...",
+          youAreAuthed: "Ви увійшли як адміністратор. Можна додавати товари.",
+          name: "Назва",
+          desc: "Опис",
+          price: "Ціна, ₴",
+          sku: "SKU",
+          oem: "OEM",
+          compat: "Сумісність (текст)",
+          condition: "Стан (Нова / Б/В)",
+          availability: "Наявність",
+          availabilityChoose: "Оберіть статус",
+          availabilityInStock: "В наявності",
+          availabilityOrder: "Під замовлення",
+          model: "Модель",
+          chooseModel: "Оберіть модель",
+          category: "Категорія",
+          chooseCategory: "Оберіть категорію",
+          photos: "Фотографії",
+          uploadFromPhone: "Завантажити з телефону (jpg, png)",
+          pickFiles: "Обрати файли",
+          pickFromPublic: "Або оберіть з /public/parts",
+          noFiles: "У папці /public/parts поки немає файлів.",
+          saveBtn: "Зберегти товар",
+          saving: "Зберігаємо...",
+          productsHeader: "Існуючі товари",
+          noProducts: "Поки немає товарів.",
+          delete: "Видалити",
+          confirmDelete: (title: string) => `Видалити товар ${title}?`,
+          searchPh: "Пошук за назвою або SKU",
+        }
+      : {
+          adminTitle: "Admin: товары",
+          adminDesc: "Закрытая страница для добавления товаров в каталог.",
+          loginTitle: "Вход в админку",
+          loginHint: "Введите админ‑пароль.",
+          password: "Пароль",
+          loginBtn: "Войти",
+          checking: "Проверяем...",
+          youAreAuthed: "Вы вошли как администратор. Можно добавлять товары.",
+          name: "Название",
+          desc: "Описание",
+          price: "Цена, ₴",
+          sku: "SKU",
+          oem: "OEM",
+          compat: "Совместимость (текст)",
+          condition: "Состояние (Новая / Б/У)",
+          availability: "Наличие",
+          availabilityChoose: "Выберите статус",
+          availabilityInStock: "В наличии",
+          availabilityOrder: "На заказ",
+          model: "Модель",
+          chooseModel: "Выберите модель",
+          category: "Категория",
+          chooseCategory: "Выберите категорию",
+          photos: "Фотографии",
+          uploadFromPhone: "Загрузить с телефона (jpg, png)",
+          pickFiles: "Выбрать файлы",
+          pickFromPublic: "Или выберите из /public/parts",
+          noFiles: "В папке /public/parts пока нет файлов.",
+          saveBtn: "Сохранить товар",
+          saving: "Сохраняем...",
+          productsHeader: "Существующие товары",
+          noProducts: "Пока нет товаров.",
+          delete: "Удалить",
+          confirmDelete: (title: string) => `Удалить товар ${title}?`,
+          searchPh: "Поиск по названию или SKU",
+        };
+
+  const filteredProducts = productsFilter
+    ? products.filter((p) => `${p.title}`.toLowerCase().includes(productsFilter.toLowerCase()) || `${(p as any).sku || ""}`.toLowerCase().includes(productsFilter.toLowerCase()))
+    : products;
+
   return (
     <div className="min-h-screen px-6 py-12 text-zinc-50">
       <div className="mx-auto max-w-3xl">
-        <h1 className="text-3xl font-semibold uppercase tracking-[0.15em] text-pink-200 drop-shadow-[0_0_14px_rgba(244,114,182,0.3)]">
-          Admin: товары
-        </h1>
-        <p className="mt-2 text-sm text-zinc-400">
-          Закрытая страница для добавления товаров в каталог.
-        </p>
+        <h1 className="text-3xl font-semibold uppercase tracking-[0.15em] text-pink-200 drop-shadow-[0_0_14px_rgba(244,114,182,0.3)]">{t.adminTitle}</h1>
+        <p className="mt-2 text-sm text-zinc-400">{t.adminDesc}</p>
 
         {!authed ? (
           <form onSubmit={onLogin} className="mt-6 space-y-4 text-sm">
             <div className="rounded-xl border border-zinc-700 bg-black/40 p-4 shadow-sm shadow-black/40">
-              <h2 className="text-lg font-semibold text-zinc-100">Вход в админку</h2>
-              <p className="mt-2 text-xs text-zinc-400">Введите админ-пароль.</p>
+              <h2 className="text-lg font-semibold text-zinc-100">{t.loginTitle}</h2>
+              <p className="mt-2 text-xs text-zinc-400">{t.loginHint}</p>
               <div className="mt-3">
-                <label className="block text-xs text-zinc-400">Пароль</label>
+                <label className="block text-xs text-zinc-400">{t.password}</label>
                 <input
                   type="password"
                   value={loginPassword}
@@ -319,16 +399,16 @@ export default function AdminPage() {
                 disabled={loading}
                 className="mt-4 rounded-full bg-white px-5 py-2 text-sm font-semibold text-black hover:bg-zinc-200 disabled:opacity-60"
               >
-                {loading ? "Проверяем..." : "Войти"}
+                {loading ? t.checking : t.loginBtn}
               </button>
             </div>
           </form>
         ) : (
           <form onSubmit={onSubmit} className="mt-6 space-y-4 text-sm">
-            <p className="text-xs text-emerald-400">Вы вошли как администратор. Можно добавлять товары.</p>
+            <p className="text-xs text-emerald-400">{t.youAreAuthed}</p>
 
             <div>
-              <label className="block text-xs text-zinc-400">Название</label>
+              <label className="block text-xs text-zinc-400">{t.name}</label>
               <input
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
@@ -338,7 +418,7 @@ export default function AdminPage() {
             </div>
 
             <div>
-              <label className="block text-xs text-zinc-400">Описание</label>
+              <label className="block text-xs text-zinc-400">{t.desc}</label>
               <textarea
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -350,7 +430,7 @@ export default function AdminPage() {
 
             <div className="grid gap-3 sm:grid-cols-3">
               <div>
-                <label className="block text-xs text-zinc-400">Цена, ₴</label>
+                <label className="block text-xs text-zinc-400">{t.price}</label>
                 <input
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
@@ -359,7 +439,7 @@ export default function AdminPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-400">SKU</label>
+                <label className="block text-xs text-zinc-400">{t.sku}</label>
                 <input
                   value={form.sku}
                   onChange={(e) => setForm({ ...form, sku: e.target.value })}
@@ -367,7 +447,7 @@ export default function AdminPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-400">OEM</label>
+                <label className="block text-xs text-zinc-400">{t.oem}</label>
                 <input
                   value={form.oem}
                   onChange={(e) => setForm({ ...form, oem: e.target.value })}
@@ -377,7 +457,7 @@ export default function AdminPage() {
             </div>
 
             <div>
-              <label className="block text-xs text-zinc-400">Совместимость (текст)</label>
+              <label className="block text-xs text-zinc-400">{t.compat}</label>
               <input
                 value={form.compatibility}
                 onChange={(e) => setForm({ ...form, compatibility: e.target.value })}
@@ -387,7 +467,7 @@ export default function AdminPage() {
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="block text-xs text-zinc-400">Состояние (Новая / Б/У)</label>
+                <label className="block text-xs text-zinc-400">{t.condition}</label>
                 <input
                   value={form.condition}
                   onChange={(e) => setForm({ ...form, condition: e.target.value })}
@@ -395,27 +475,27 @@ export default function AdminPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-400">Наличие</label>
+                <label className="block text-xs text-zinc-400">{t.availability}</label>
                 <select
                   value={form.availability}
                   onChange={(e) => setForm({ ...form, availability: e.target.value })}
                   className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-sm outline-none focus:border-zinc-600"
                 >
-                  <option value="">Выберите статус</option>
-                  <option value="В наличии">В наличии</option>
-                  <option value="На заказ">На заказ</option>
+                  <option value="">{t.availabilityChoose}</option>
+                  <option value="В наличии">{t.availabilityInStock}</option>
+                  <option value="На заказ">{t.availabilityOrder}</option>
                 </select>
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="block text-xs text-zinc-400">Модель</label>
+                <label className="block text-xs text-zinc-400">{t.model}</label>
                 <select
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
                   className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-sm outline-none focus:border-zinc-600"
                 >
-                  <option value="">Выберите модель</option>
+                  <option value="">{t.chooseModel}</option>
                   {models.map((m) => (
                     <option key={m} value={m}>
                       {m}
@@ -424,13 +504,13 @@ export default function AdminPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-zinc-400">Категория</label>
+                <label className="block text-xs text-zinc-400">{t.category}</label>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-sm outline-none focus:border-zinc-600"
                 >
-                  <option value="">Выберите категорию</option>
+                  <option value="">{t.chooseCategory}</option>
                   {categories.map((c) => (
                     <option key={c} value={c}>
                       {c}
@@ -441,10 +521,10 @@ export default function AdminPage() {
             </div>
 
             <div>
-              <label className="block text-xs text-zinc-400">Фотографии</label>
+              <label className="block text-xs text-zinc-400">{t.photos}</label>
               <div className="mt-2 flex flex-col gap-2 rounded-lg border border-zinc-800 bg-black/30 p-3">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="text-xs text-zinc-400">Загрузить с телефона (jpg, png)</div>
+                  <div className="text-xs text-zinc-400">{t.uploadFromPhone}</div>
                   <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-zinc-700 px-3 py-1.5 text-xs hover:bg-zinc-900">
                     <input
                       type="file"
@@ -453,7 +533,7 @@ export default function AdminPage() {
                       onChange={onFilesSelected}
                       className="hidden"
                     />
-                    <span className="text-zinc-200">{uploading ? "Загружается..." : "Выбрать файлы"}</span>
+                    <span className="text-zinc-200">{uploading ? (lang === "uk" ? "Завантажується..." : "Загружается...") : t.pickFiles}</span>
                   </label>
                 </div>
                 {selectedImages.length > 0 ? (
@@ -520,11 +600,9 @@ export default function AdminPage() {
                 ) : null}
               </div>
               <div className="mt-3">
-                <label className="block text-xs text-zinc-400">Или выберите из /public/parts</label>
+                <label className="block text-xs text-zinc-400">{t.pickFromPublic}</label>
                 {availableImages.length === 0 ? (
-                  <p className="mt-2 text-xs text-зinc-500">
-                    В папке <span className="font-mono">/public/parts</span> пока нет файлов. Добавьте изображения через IDE или хостинг.
-                  </p>
+                  <p className="mt-2 text-xs text-zinc-500">{t.noFiles}</p>
                 ) : (
                   <div className="mt-2 max-h-48 space-y-1 overflow-y-auto rounded-lg border border-zinc-800 bg-black/30 p-2 text-xs">
                     {availableImages.map((name) => (
@@ -551,17 +629,23 @@ export default function AdminPage() {
               disabled={loading}
               className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black hover:bg-zinc-200 disabled:opacity-60"
             >
-              {loading ? "Сохраняем..." : "Сохранить товар"}
+              {loading ? t.saving : t.saveBtn}
             </button>
 
             {/* Список существующих товаров */}
             <div className="mt-10 rounded-xl border border-zinc-800 bg-black/30 p-3">
-              <div className="mb-2 text-sm font-semibold text-zinc-100">Существующие товары</div>
-              {products.length === 0 ? (
-                <div className="text-xs text-zinc-400">Пока нет товаров.</div>
+              <div className="mb-2 text-sm font-semibold text-zinc-100">{t.productsHeader}</div>
+              <input
+                value={productsFilter}
+                onChange={(e) => setProductsFilter(e.target.value)}
+                placeholder={t.searchPh}
+                className="mb-2 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-xs outline-none focus:border-zinc-600"
+              />
+              {filteredProducts.length === 0 ? (
+                <div className="text-xs text-zinc-400">{t.noProducts}</div>
               ) : (
                 <ul className="max-h-80 space-y-2 overflow-y-auto text-sm">
-                  {products.map((p) => (
+                  {filteredProducts.map((p) => (
                     <li key={p.id} className="flex items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-900/40 px-3 py-2">
                       <div className="flex min-w-0 items-center gap-3">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -574,7 +658,7 @@ export default function AdminPage() {
                       <button
                         type="button"
                         onClick={async () => {
-                          if (!confirm(`Удалить товар ${p.title}?`)) return;
+                          if (!confirm(t.confirmDelete(p.title))) return;
                           try {
                             const res = await fetch(`/api/admin/products?id=${encodeURIComponent(p.id)}`, {
                               method: "DELETE",
@@ -582,16 +666,16 @@ export default function AdminPage() {
                             });
                             if (!res.ok && res.status !== 204) {
                               const data = await res.json().catch(() => ({}));
-                              throw new Error(data?.error || "Ошибка удаления");
+                              throw new Error(data?.error || (lang === "uk" ? "Помилка видалення" : "Ошибка удаления"));
                             }
                             setProducts((prev) => prev.filter((x) => x.id !== p.id));
                           } catch (err: any) {
-                            alert(err?.message || "Ошибка удаления");
+                            alert(err?.message || (lang === "uk" ? "Помилка видалення" : "Ошибка удаления"));
                           }
                         }}
                         className="rounded-full border border-red-500/50 px-3 py-1 text-xs text-red-300 hover:bg-red-500/10"
                       >
-                        Удалить
+                        {t.delete}
                       </button>
                     </li>
                   ))}
