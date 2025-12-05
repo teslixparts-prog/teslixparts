@@ -23,7 +23,7 @@ export default function AdminCarsPage() {
   const [uploading, setUploading] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverTrash, setDragOverTrash] = useState(false);
-  const [cars, setCars] = useState<Array<{ id: string; make: string; model: string; year: number; images: string[] }>>([]);
+  const [cars, setCars] = useState<Array<{ id: string; make: string; model: string; year: number; vin: string; images: string[] }>>([]);
   const [carsFilter, setCarsFilter] = useState("");
 
   const [loading, setLoading] = useState(false);
