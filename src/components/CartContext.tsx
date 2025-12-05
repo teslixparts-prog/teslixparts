@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
-import { Product, demoProducts } from "@/lib/products";
+import { Product } from "@/lib/products";
 
 export type CartItem = {
   productId: string;
@@ -22,7 +22,7 @@ const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [products, setProducts] = useState<Product[]>(demoProducts);
+  const [products, setProducts] = useState<Product[]>([]);
 
   // Восстанавливаем корзину из localStorage при первом рендере на клиенте
   useEffect(() => {
@@ -72,7 +72,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     (async () => {
       try {
-        const res = await fetch("/api/products");
+        const res = await fetch("/api/products", { cache: "no-store" });
         if (!res.ok) return;
         const data: Product[] = await res.json();
         if (!cancelled && Array.isArray(data) && data.length > 0) {

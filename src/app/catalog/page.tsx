@@ -12,7 +12,7 @@ export default function CatalogPage() {
   const [category, setCategory] = useState<string>("");
   const [modelOpen, setModelOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
-  const [products, setProducts] = useState<Product[]>(demoProducts);
+  const [products, setProducts] = useState<Product[]>([]);
 
   const t =
     lang === "uk"
@@ -21,12 +21,14 @@ export default function CatalogPage() {
           searchPlaceholder: "Пошук за назвою, SKU або OEM",
           allModels: "Усі моделі",
           allCategories: "Усі категорії",
+          empty: "Наразі немає товарів.",
         }
       : {
           title: "Каталог запчастей",
           searchPlaceholder: "Поиск по названию, SKU или OEM",
           allModels: "Все модели",
           allCategories: "Все категории",
+          empty: "Пока нет товаров.",
         };
 
   const filtered = useMemo(() => {
@@ -47,7 +49,7 @@ export default function CatalogPage() {
 
     (async () => {
       try {
-        const res = await fetch("/api/products");
+        const res = await fetch("/api/products", { cache: "no-store" });
         if (!res.ok) return;
         const data: Product[] = await res.json();
         if (!cancelled && Array.isArray(data) && data.length > 0) {
@@ -167,11 +169,15 @@ export default function CatalogPage() {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((p) => (
-            <ProductCard key={p.id} p={p} />)
-          )}
-        </div>
+        {filtered.length === 0 ? (
+          <p className="mt-8 text-sm text-zinc-400">{t.empty}</p>
+        ) : (
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((p) => (
+              <ProductCard key={p.id} p={p} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

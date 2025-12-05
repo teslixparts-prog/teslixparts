@@ -1,10 +1,12 @@
 "use client";
 
 import { FormEvent, useEffect, useState, type ChangeEvent } from "react";
+import { useLanguage } from "@/components/LanguageContext";
 
 const carModels = ["Model 3", "Model Y", "Model S", "Model X", "Cybertruck"];
 
 export default function AdminCarsPage() {
+  const { lang } = useLanguage();
   const [loginPassword, setLoginPassword] = useState("");
   const [adminKey, setAdminKey] = useState("");
   const [authed, setAuthed] = useState(false);
@@ -21,6 +23,7 @@ export default function AdminCarsPage() {
   const [uploading, setUploading] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverTrash, setDragOverTrash] = useState(false);
+  const [cars, setCars] = useState<Array<{ id: string; make: string; model: string; year: number; images: string[] }>>([]);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -50,6 +53,18 @@ export default function AdminCarsPage() {
         if (!res.ok) return;
         const data = await res.json();
         if (!cancelled && Array.isArray(data.files)) setAvailableImages(data.files);
+      } catch {}
+    })();
+    (async () => {
+      try {
+        const res = await fetch("/api/cars", { cache: "no-store" });
+        if (!res.ok) return;
+        const data: any[] = await res.json();
+        if (!cancelled && Array.isArray(data)) {
+          setCars(
+            data.map((c) => ({ id: String(c.id), make: c.make, model: c.model, year: Number(c.year || 0), images: Array.isArray(c.images) ? c.images : [] })),
+          );
+        }
       } catch {}
     })();
     return () => {
@@ -225,9 +240,9 @@ export default function AdminCarsPage() {
     <div className="min-h-screen px-6 py-12 text-zinc-50">
       <div className="mx-auto max-w-3xl">
         <h1 className="text-3xl font-semibold uppercase tracking-[0.15em] text-pink-200 drop-shadow-[0_0_14px_rgba(244,114,182,0.3)]">
-          Admin: авто под разбор
+          {lang === "uk" ? "Адмін: авто під розбір" : "Admin: авто под разбор"}
         </h1>
-        <p className="mt-2 text-sm text-zinc-400">Добавление автомобилей под разбор.</p>
+        <p className="mt-2 text-sm text-zinc-400">{lang === "uk" ? "Додавання авто під розбір." : "Добавление автомобилей под разбор."}</p>
 
         {!authed ? (
           <form onSubmit={onLogin} className="mt-6 space-y-4 text-sm">
@@ -244,15 +259,15 @@ export default function AdminCarsPage() {
           </form>
         ) : (
           <form onSubmit={onSubmit} className="mt-6 space-y-4 text-sm">
-            <p className="text-xs text-emerald-400">Вы вошли как администратор. Можно добавлять авто.</p>
+            <p className="text-xs text-emerald-400">{lang === "uk" ? "Ви ввійшли як адміністратор. Можна додавати авто." : "Вы вошли как администратор. Можно добавлять авто."}</p>
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="block text-xs text-zinc-400">Марка</label>
+                <label className="block text-xs text-zinc-400">{lang === "uk" ? "Марка" : "Марка"}</label>
                 <input value={make} onChange={(e) => setMake(e.target.value)} className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 outline-none focus:border-zinc-600" />
               </div>
               <div>
-                <label className="block text-xs text-zinc-400">Модель</label>
+                <label className="block text-xs text-zinc-400">{lang === "uk" ? "Модель" : "Модель"}</label>
                 <select value={model} onChange={(e) => setModel(e.target.value)} className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-sm outline-none focus:border-zinc-600">
                   <option value="">Выберите модель</option>
                   {carModels.map((m) => (
@@ -264,7 +279,7 @@ export default function AdminCarsPage() {
 
             <div className="grid gap-3 sm:grid-cols-3">
               <div>
-                <label className="block text-xs text-zinc-400">Год выпуска</label>
+                <label className="block text-xs text-zinc-400">{lang === "uk" ? "Рік випуску" : "Год выпуска"}</label>
                 <input value={year} onChange={(e) => setYear(e.target.value)} className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 outline-none focus:border-zinc-600" placeholder="2021" />
               </div>
               <div>
@@ -272,28 +287,28 @@ export default function AdminCarsPage() {
                 <input value={vin} onChange={(e) => setVin(e.target.value)} className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 outline-none focus:border-zinc-600" />
               </div>
               <div>
-                <label className="block text-xs text-zinc-400">Пробег, км</label>
+                <label className="block text-xs text-zinc-400">{lang === "uk" ? "Пробіг, км" : "Пробег, км"}</label>
                 <input value={mileage} onChange={(e) => setMileage(e.target.value)} className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 outline-none focus:border-zinc-600" placeholder="120000" />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs text-zinc-400">Статус</label>
+              <label className="block text-xs text-zinc-400">{lang === "uk" ? "Статус" : "Статус"}</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
                 className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-sm outline-none focus:border-zinc-600"
               >
-                <option value="В наличии">В наличии</option>
-                <option value="В пути (возможно бронирование)">В пути (возможно бронирование)</option>
+                <option value="В наличии">{lang === "uk" ? "В наявності" : "В наличии"}</option>
+                <option value="В пути (возможно бронирование)">{lang === "uk" ? "В дорозі (можливе бронювання)" : "В пути (возможно бронирование)"}</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs text-zinc-400">Фотографии</label>
+              <label className="block text-xs text-zinc-400">{lang === "uk" ? "Фотографії" : "Фотографии"}</label>
               <div className="mt-2 flex flex-col gap-2 rounded-lg border border-zinc-800 bg-black/30 p-3">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="text-xs text-zinc-400">Загрузить с телефона (jpg, png)</div>
+                  <div className="text-xs text-zinc-400">{lang === "uk" ? "Завантажити з телефону (jpg, png)" : "Загрузить с телефона (jpg, png)"}</div>
                   <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-zinc-700 px-3 py-1.5 text-xs hover:bg-zinc-900">
                     <input type="file" accept="image/*" multiple onChange={onFilesSelected} className="hidden" />
                     <span className="text-zinc-200">{uploading ? "Загружается..." : "Выбрать файлы"}</span>
@@ -342,7 +357,52 @@ export default function AdminCarsPage() {
             {message ? <p className="text-sm text-emerald-400">{message}</p> : null}
             {error ? <p className="text-sm text-red-400">{error}</p> : null}
 
-            <button type="submit" disabled={loading} className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black hover:bg-zinc-200 disabled:opacity-60">{loading ? "Сохраняем..." : "Сохранить авто"}</button>
+            <button type="submit" disabled={loading} className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black hover:bg-зinc-200 disabled:opacity-60">{loading ? (lang === "uk" ? "Зберігаємо..." : "Сохраняем...") : (lang === "uk" ? "Зберегти авто" : "Сохранить авто")}</button>
+
+            {/* Список существующих авто */}
+            <div className="mt-10 rounded-xl border border-zinc-800 bg-black/30 p-3">
+              <div className="mb-2 text-sm font-semibold text-zinc-100">{lang === "uk" ? "Існуючі авто" : "Существующие авто"}</div>
+              {cars.length === 0 ? (
+                <div className="text-xs text-zinc-400">{lang === "uk" ? "Поки немає авто." : "Пока нет авто."}</div>
+              ) : (
+                <ul className="max-h-80 space-y-2 overflow-y-auto text-sm">
+                  {cars.map((c) => (
+                    <li key={c.id} className="flex items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-900/40 px-3 py-2">
+                      <div className="flex min-w-0 items-center gap-3">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={(c.images && c.images[0]) || "/demo/car-placeholder.jpg"} className="h-10 w-14 flex-shrink-0 rounded object-cover" alt="" />
+                        <div className="min-w-0">
+                          <div className="truncate text-zinc-100">{c.make} {c.model} • {c.year}</div>
+                          <div className="text-xs text-zinc-400">{c.id}</div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!confirm((lang === "uk" ? "Видалити авто " : "Удалить авто ") + `${c.make} ${c.model}?`)) return;
+                          try {
+                            const res = await fetch(`/api/admin/cars?id=${encodeURIComponent(c.id)}`, {
+                              method: "DELETE",
+                              headers: { "x-admin-key": adminKey },
+                            });
+                            if (!res.ok && res.status !== 204) {
+                              const data = await res.json().catch(() => ({}));
+                              throw new Error(data?.error || (lang === "uk" ? "Помилка видалення" : "Ошибка удаления"));
+                            }
+                            setCars((prev) => prev.filter((x) => x.id !== c.id));
+                          } catch (err: any) {
+                            alert(err?.message || (lang === "uk" ? "Помилка видалення" : "Ошибка удаления"));
+                          }
+                        }}
+                        className="rounded-full border border-red-500/50 px-3 py-1 text-xs text-red-300 hover:bg-red-500/10"
+                      >
+                        {lang === "uk" ? "Видалити" : "Удалить"}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </form>
         )}
       </div>

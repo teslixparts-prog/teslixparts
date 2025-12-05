@@ -14,6 +14,7 @@ export default function SelectionRequestPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [extra, setExtra] = useState("");
+  const [showThanks, setShowThanks] = useState(false);
 
   const ui =
     lang === "uk"
@@ -29,6 +30,10 @@ export default function SelectionRequestPage() {
           extraPlaceholder: "Додаткова інформація (VIN вашого авто тощо)",
           submitLabel: "Залишити заявку",
           backLabel: "Назад",
+          thanksTitle: "Дякуємо за звернення!",
+          thanksText:
+            "Ми отримали вашу заявку на підбір запчастин. Менеджер зв'яжеться з вами найближчим часом, щоб уточнити деталі та запропонувати варіанти.",
+          thanksCta: "На головну",
           mailBody: (b: string, m: string, p: string, f: string, e: string, x: string) =>
             `Марка: ${b}\nМодель: ${m}\nТелефон: ${p}\nПІБ: ${f}\nE-mail: ${e}\n\nДодаткова інформація:\n${x}`,
         }
@@ -44,6 +49,10 @@ export default function SelectionRequestPage() {
           extraPlaceholder: "Дополнительная информация (VIN вашего авто и т.д.)",
           submitLabel: "Оставить заявку",
           backLabel: "Назад",
+          thanksTitle: "Спасибо за обращение!",
+          thanksText:
+            "Мы получили вашу заявку на подбор запчастей. Менеджер свяжется с вами в ближайшее время, чтобы уточнить детали и предложить варианты.",
+          thanksCta: "На главную",
           mailBody: (b: string, m: string, p: string, f: string, e: string, x: string) =>
             `Марка: ${b}\nМодель: ${m}\nТелефон: ${p}\nФИО: ${f}\nE-mail: ${e}\n\nДополнительная информация:\n${x}`,
         };
@@ -68,13 +77,13 @@ export default function SelectionRequestPage() {
       });
 
       if (!res.ok) {
-        alert("Не удалось отправить заявку. Попробуйте ещё раз или напишите нам напрямую.");
+        alert(lang === "uk" ? "Не вдалося відправити заявку. Спробуйте ще раз або напишіть нам напряму." : "Не удалось отправить заявку. Попробуйте ещё раз или напишите нам напрямую.");
         return;
       }
 
-      router.push("/");
+      setShowThanks(true);
     } catch {
-      alert("Произошла ошибка при отправке заявки. Попробуйте ещё раз чуть позже.");
+      alert(lang === "uk" ? "Сталася помилка під час відправки заявки. Спробуйте ще раз пізніше." : "Произошла ошибка при отправке заявки. Попробуйте ещё раз чуть позже.");
     }
   };
 
@@ -144,6 +153,36 @@ export default function SelectionRequestPage() {
           </div>
         </form>
       </div>
+      {showThanks && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="relative w-full max-w-md rounded-2xl border border-zinc-700 bg-zinc-900/95 p-6 text-sm text-zinc-100 shadow-xl shadow-black/60">
+            <button
+              type="button"
+              onClick={() => {
+                setShowThanks(false);
+                router.push("/");
+              }}
+              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border border-zinc-700 text-xs text-zinc-300 transition hover:border-zinc-500 hover:bg-zinc-800 hover:text-zinc-50"
+            >
+              ✕
+            </button>
+            <h2 className="pr-8 text-lg font-semibold text-pink-200 drop-shadow-[0_0_14px_rgba(244,114,182,0.4)]">
+              {ui.thanksTitle}
+            </h2>
+            <p className="mt-3 text-sm text-zinc-300">{ui.thanksText}</p>
+            <button
+              type="button"
+              onClick={() => {
+                setShowThanks(false);
+                router.push("/");
+              }}
+              className="mt-5 inline-flex items-center justify-center rounded-full bg-white px-5 py-2 text-sm font-semibold text-black shadow-sm shadow-pink-200/40 transition hover:bg-zinc-200"
+            >
+              {ui.thanksCta}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
