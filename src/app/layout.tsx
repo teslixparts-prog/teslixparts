@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import Image from "next/image";
 import Link from "next/link";
 import "./globals.css";
@@ -28,8 +29,20 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const adsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || "AW-17782747987";
   return (
     <html lang="ru">
+      <head>
+        <Script id="gtag-base" src={`https://www.googletagmanager.com/gtag/js?id=${adsId}`} strategy="afterInteractive" />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${adsId}');
+          `}
+        </Script>
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <CartProvider>
           <LanguageProvider>
