@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
       availability,
     } = body;
 
-    if (!title || !description || !price || !images || !sku) {
+    if (!title || !description || !price || !images) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
         description,
         price: Number(price),
         images: JSON.stringify(images ?? []),
-        sku,
+        sku: sku ?? "",
         tags: JSON.stringify(tags ?? []),
         oem: oem ?? null,
         compatibility: compatibility ?? null,
