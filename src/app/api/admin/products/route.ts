@@ -10,7 +10,6 @@ export async function POST(req: NextRequest) {
   if (adminKey !== ADMIN_PASSWORD) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
   const body = await req.json();
 
   try {
@@ -53,6 +52,30 @@ export async function POST(req: NextRequest) {
       (typeof err?.message === "string" && err.message) ||
       (typeof err === "string" ? err : "Server error");
 
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const adminKey = req.headers.get("x-admin-key") || "";
+  if (adminKey !== ADMIN_PASSWORD) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+  if (!id) {
+    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  }
+
+  try {
+    await prisma.product.delete({ where: { id } });
+    return new NextResponse(null, { status: 204 });
+  } catch (err: any) {
+    console.error("/api/admin/products DELETE error", err);
+    const message =
+      (typeof err?.message === "string" && err.message) ||
+      (typeof err === "string" ? err : "Server error");
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

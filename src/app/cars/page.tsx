@@ -15,6 +15,8 @@ type Car = {
 
 export default function CarsPage() {
   const [cars, setCars] = useState<Car[]>([]);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -31,6 +33,11 @@ export default function CarsPage() {
     };
   }, []);
 
+  const selectedCar = openId ? cars.find((x) => x.id === openId) ?? null : null;
+  const selectedImages = selectedCar?.images ?? [];
+  const gotoPrev = () => setCurrentIndex((i) => (i === 0 ? (selectedImages.length || 1) - 1 : i - 1));
+  const gotoNext = () => setCurrentIndex((i) => (i === (selectedImages.length || 1) - 1 ? 0 : i + 1));
+
   return (
     <div className="min-h-screen px-6 py-12 text-zinc-50">
       <div className="mx-auto max-w-6xl">
@@ -45,14 +52,22 @@ export default function CarsPage() {
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {cars.map((c) => (
               <div key={c.id} className="rounded-xl border border-zinc-800 bg-black/40 p-3">
-                <div className="aspect-video overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpenId(c.id);
+                    setCurrentIndex(0);
+                  }}
+                  className="aspect-video w-full overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900"
+                  aria-label="Открыть галерею"
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={c.images[0] || "/demo/car-placeholder.jpg"}
                     alt={`${c.make} ${c.model}`}
                     className="h-full w-full object-cover"
                   />
-                </div>
+                </button>
                 <div className="mt-3 text-sm">
                   <div className="font-semibold text-zinc-100">{c.make} {c.model} • {c.year}</div>
                   <div className="mt-1 flex items-center justify-between gap-2 text-zinc-400">
@@ -81,6 +96,58 @@ export default function CarsPage() {
               </div>
             ))}
           </div>
+          {/* Lightbox */}
+          {openId && selectedCar ? (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 py-6">
+              <div className="relative w-full max-w-4xl rounded-2xl border border-zinc-800 bg-zinc-900/90 p-4 text-zinc-50">
+                <button
+                  type="button"
+                  onClick={() => setOpenId(null)}
+                  className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-zinc-600 bg-black/60 text-base text-white shadow-md hover:bg-black/80"
+                >
+                  ✕
+                </button>
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={gotoPrev}
+                    className="hidden h-10 w-10 items-center justify-center rounded-full border border-zinc-700 text-lg text-zinc-200 hover:bg-zinc-800 sm:flex"
+                  >
+                    ‹
+                  </button>
+                  <div className="relative aspect-video w-full flex-1 overflow-hidden rounded-xl bg-black">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={selectedImages[currentIndex]} alt={`${selectedCar.make} ${selectedCar.model}`} className="h-full w-full object-contain" />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={gotoNext}
+                    className="hidden h-10 w-10 items-center justify-center rounded-full border border-zinc-700 text-lg text-zinc-200 hover:bg-zinc-800 sm:flex"
+                  >
+                    ›
+                  </button>
+                </div>
+                {selectedImages.length > 1 ? (
+                  <div className="mt-3 flex gap-2 overflow-x-auto">
+                    {selectedImages.map((img, idx) => (
+                      <button
+                        key={img + idx}
+                        type="button"
+                        onClick={() => setCurrentIndex(idx)}
+                        className={`relative h-16 w-24 flex-shrink-0 overflow-hidden rounded-md border ${idx === currentIndex ? "border-zinc-100" : "border-zinc-700"}`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={img} alt={`${selectedCar.make} ${selectedCar.model}`} className="h-full w-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+                <div className="mt-2 text-xs text-zinc-400">
+                  {currentIndex + 1} / {selectedImages.length}
+                </div>
+              </div>
+            </div>
+          ) : null}
         )}
       </div>
     </div>

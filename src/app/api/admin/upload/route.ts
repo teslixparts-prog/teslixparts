@@ -31,7 +31,11 @@ export async function POST(req: NextRequest) {
     }
 
     const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-    const uploaded = await put(filename, file, { access: "public" });
+    const uploaded = await put(filename, file, {
+      access: "public",
+      // Provide token explicitly for Edge runtime when Blob store isn't auto-bound
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+    });
 
     return NextResponse.json({ url: uploaded.url }, { status: 201 });
   } catch (err: any) {
