@@ -82,7 +82,7 @@ export default function AdminPage() {
 
     (async () => {
       try {
-        const res = await fetch("/api/products");
+        const res = await fetch("/api/admin/products", { headers: { "x-admin-key": adminKey } });
         if (!res.ok) return;
         const data: any[] = await res.json();
         if (!cancelled && Array.isArray(data)) {
