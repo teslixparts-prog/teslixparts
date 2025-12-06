@@ -21,7 +21,7 @@ export default function AdminPage() {
   const [loginPassword, setLoginPassword] = useState("");
   const [authed, setAuthed] = useState(false);
   const [form, setForm] = useState(initialForm);
-  const [products, setProducts] = useState<Array<{ id: string; title: string; price: number; images: string[] }>>([]);
+  const [products, setProducts] = useState<Array<{ id: string; title: string; price: number; images: string[]; availability?: string }>>([]);
   const [productsFilter, setProductsFilter] = useState("");
   const [selectedModel, setSelectedModel] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -33,6 +33,9 @@ export default function AdminPage() {
   const [uploading, setUploading] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverTrash, setDragOverTrash] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editPrice, setEditPrice] = useState<string>("");
+  const [editAvailability, setEditAvailability] = useState<string>("В наличии");
 
   const onLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -87,7 +90,7 @@ export default function AdminPage() {
         const data: any[] = await res.json();
         if (!cancelled && Array.isArray(data)) {
           setProducts(
-            data.map((p) => ({ id: String(p.id), title: p.title, price: Number(p.price || 0), images: Array.isArray(p.images) ? p.images : [] })),
+            data.map((p) => ({ id: String(p.id), title: p.title, price: Number(p.price || 0), images: Array.isArray(p.images) ? p.images : [], availability: p.availability })),
           );
         }
       } catch {}
@@ -660,7 +663,100 @@ export default function AdminPage() {
                           <div className="text-xs text-zinc-400">{p.id}</div>
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
+                        {editId === p.id ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              value={editPrice}
+                              onChange={(e) => setEditPrice(e.target.value)}
+                              type="number"
+                              min="0"
+                              step="1"
+                              className="w-28 rounded-lg border border-zinc-700 bg-zinc-900/60 px-2 py-1 text-xs text-zinc-100 outline-none focus:border-zinc-500"
+                              placeholder="Цена"
+                            />
+                            <select
+                              value={editAvailability}
+                              onChange={(e) => setEditAvailability(e.target.value)}
+                              className="rounded-lg border border-zinc-700 bg-zinc-900/60 px-2 py-1 text-xs text-zinc-100 outline-none focus:border-zinc-500"
+                            >
+                              <option value="В наличии">В наличии</option>
+                              <option value="Забронирован">Забронирован</option>
+                              <option value="На заказ">На заказ</option>
+                            </select>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                const val = Number(editPrice);
+                                if (Number.isNaN(val) || val < 0) {
+                                  alert(lang === "uk" ? "Некоректна ціна" : "Некорректная цена");
+                                  return;
+                                }
+                                try {
+                                  const res = await fetch(`/api/admin/products`, {
+                                    method: "PATCH",
+                                    headers: { "x-admin-key": adminKey, "Content-Type": "application/json" },
+                                    body: JSON.stringify({ id: p.id, price: val, availability: editAvailability }),
+                                  });
+                                  if (!res.ok && res.status !== 204) {
+                                    const data = await res.json().catch(() => ({}));
+                                    throw new Error(data?.error || (lang === "uk" ? "Помилка збереження" : "Ошибка сохранения"));
+                                  }
+                                  setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, price: val, availability: editAvailability } : x)));
+                                  setEditId(null);
+                                  setEditPrice("");
+                                  setEditAvailability("В наличии");
+                                } catch (err: any) {
+                                  alert(err?.message || (lang === "uk" ? "Помилка збереження" : "Ошибка сохранения"));
+                                }
+                              }}
+                              className="rounded-full border border-emerald-500/50 px-3 py-1 text-xs text-emerald-300 hover:bg-emerald-500/10"
+                            >
+                              {lang === "uk" ? "Зберегти" : "Сохранить"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditId(null);
+                                setEditPrice("");
+                                setEditAvailability("В наличии");
+                              }}
+                              className="rounded-full border border-zinc-600 px-3 py-1 text-xs text-zinc-300 hover:bg-zinc-800/60"
+                            >
+                              {lang === "uk" ? "Скасувати" : "Отмена"}
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="text-xs text-zinc-300">
+                              {p.price.toLocaleString("ru-UA")} ₴
+                            </div>
+                            {p.availability ? (
+                              <span
+                                className={`inline-flex items-center gap-2 rounded-md px-2 py-1 text-[10px] font-medium ${
+                                  p.availability === "В наличии"
+                                    ? "bg-emerald-500/3 text-emerald-200 ring-1 ring-emerald-500/10"
+                                    : p.availability === "Забронирован"
+                                    ? "bg-amber-500/10 text-amber-200 ring-1 ring-amber-500/20"
+                                    : "bg-red-500/3 text-red-200 ring-1 ring-red-500/10"
+                                }`}
+                              >
+                                {p.availability}
+                              </span>
+                            ) : null}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditId(p.id);
+                                setEditPrice(String(p.price));
+                                setEditAvailability(p.availability || "В наличии");
+                              }}
+                              className="rounded-full border border-sky-500/50 px-3 py-1 text-xs text-sky-300 hover:bg-sky-500/10"
+                            >
+                              {lang === "uk" ? "Змінити" : "Изменить"}
+                            </button>
+                          </>
+                        )}
                         <button
                           type="button"
                           onClick={async () => {

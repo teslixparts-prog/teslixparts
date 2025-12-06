@@ -120,12 +120,20 @@ export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({} as any));
     const id = typeof body?.id === "string" ? body.id : null;
-    const availability = typeof body?.availability === "string" ? body.availability : null;
-    if (!id || !availability) {
-      return NextResponse.json({ error: "Missing id or availability" }, { status: 400 });
+    const availability = typeof body?.availability === "string" ? body.availability : undefined;
+    const price = body?.price != null ? Number(body.price) : undefined;
+    if (!id) {
+      return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    }
+    if (availability === undefined && price === undefined) {
+      return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
     }
 
-    await prisma.product.update({ where: { id }, data: { availability } });
+    const data: any = {};
+    if (availability !== undefined) data.availability = availability;
+    if (price !== undefined && !Number.isNaN(price)) data.price = price;
+
+    await prisma.product.update({ where: { id }, data });
     return new NextResponse(null, { status: 204 });
   } catch (err: any) {
     console.error("/api/admin/products PATCH error", err);

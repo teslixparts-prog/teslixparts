@@ -65,7 +65,7 @@ export default function CatalogPage() {
         const res = await fetch("/api/products", { cache: "no-store" });
         if (!res.ok) return;
         const data: Product[] = await res.json();
-        if (!cancelled && Array.isArray(data) && data.length > 0) {
+        if (!cancelled && Array.isArray(data)) {
           setProducts(data);
         }
       } catch {
