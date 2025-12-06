@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
       availability,
     } = body;
 
-    if (!title || !description || !price || !images || !sku) {
+    if (!title || !description || !price || !images) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -67,12 +67,12 @@ export async function POST(req: NextRequest) {
         description,
         price: Number(price),
         images: JSON.stringify(images ?? []),
-        sku,
+        sku: sku ?? "",
         tags: JSON.stringify(tags ?? []),
         oem: oem ?? null,
         compatibility: compatibility ?? null,
         condition: condition ?? null,
-        availability: availability ?? null,
+        availability: availability ?? "В наличии",
       },
     });
 
@@ -104,6 +104,31 @@ export async function DELETE(req: NextRequest) {
     return new NextResponse(null, { status: 204 });
   } catch (err: any) {
     console.error("/api/admin/products DELETE error", err);
+    const message =
+      (typeof err?.message === "string" && err.message) ||
+      (typeof err === "string" ? err : "Server error");
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  const adminKey = req.headers.get("x-admin-key") || "";
+  if (adminKey !== ADMIN_PASSWORD) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const body = await req.json().catch(() => ({} as any));
+    const id = typeof body?.id === "string" ? body.id : null;
+    const availability = typeof body?.availability === "string" ? body.availability : null;
+    if (!id || !availability) {
+      return NextResponse.json({ error: "Missing id or availability" }, { status: 400 });
+    }
+
+    await prisma.product.update({ where: { id }, data: { availability } });
+    return new NextResponse(null, { status: 204 });
+  } catch (err: any) {
+    console.error("/api/admin/products PATCH error", err);
     const message =
       (typeof err?.message === "string" && err.message) ||
       (typeof err === "string" ? err : "Server error");
