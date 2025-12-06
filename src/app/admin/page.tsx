@@ -634,7 +634,12 @@ export default function AdminPage() {
 
             {/* Список существующих товаров */}
             <div className="mt-10 rounded-xl border border-zinc-800 bg-black/30 p-3">
-              <div className="mb-2 text-sm font-semibold text-zinc-100">{t.productsHeader}</div>
+              <div className="mb-2 flex items-center justify-between">
+                <div className="text-sm font-semibold text-zinc-100">{t.productsHeader}</div>
+                <div className="text-[10px] text-zinc-500" title="build">
+                  {process.env.VERCEL_GIT_COMMIT_SHA ? process.env.VERCEL_GIT_COMMIT_SHA.slice(0,7) : "dev"}
+                </div>
+              </div>
               <input
                 value={productsFilter}
                 onChange={(e) => setProductsFilter(e.target.value)}
@@ -677,6 +682,28 @@ export default function AdminPage() {
                           className="rounded-full border border-amber-500/50 px-3 py-1 text-xs text-amber-300 hover:bg-amber-500/10"
                         >
                           {lang === "uk" ? "Продано" : "Продано"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              const res = await fetch(`/api/admin/products`, {
+                                method: "PATCH",
+                                headers: { "x-admin-key": adminKey, "Content-Type": "application/json" },
+                                body: JSON.stringify({ id: p.id, availability: "В наличии" }),
+                              });
+                              if (!res.ok && res.status !== 204) {
+                                const data = await res.json().catch(() => ({}));
+                                throw new Error(data?.error || (lang === "uk" ? "Помилка відновлення" : "Ошибка восстановления"));
+                              }
+                              alert(lang === "uk" ? "Відновлено у каталозі" : "Восстановлено в каталоге");
+                            } catch (err: any) {
+                              alert(err?.message || (lang === "uk" ? "Помилка відновлення" : "Ошибка восстановления"));
+                            }
+                          }}
+                          className="rounded-full border border-emerald-500/50 px-3 py-1 text-xs text-emerald-300 hover:bg-emerald-500/10"
+                        >
+                          {lang === "uk" ? "Відновити" : "Восстановить"}
                         </button>
                         <button
                           type="button"
