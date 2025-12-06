@@ -14,6 +14,7 @@ export default function ModelPage() {
       "model-y": "Model Y",
       "model-x": "Model X",
       "model-s": "Model S",
+      "cybertruck": "Cybertruck",
     };
     return map[slug] || "";
   }, [params]);
