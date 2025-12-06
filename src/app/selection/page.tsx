@@ -82,6 +82,19 @@ export default function SelectionRequestPage() {
       }
 
       setShowThanks(true);
+
+      // Google Ads conversion for selection (VIN) request
+      try {
+        const adsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || "AW-17782747987";
+        const label = process.env.NEXT_PUBLIC_GADS_SELECTION_LABEL || "";
+        if (typeof window !== "undefined" && (window as any).gtag && label) {
+          (window as any).gtag("event", "conversion", {
+            send_to: `${adsId}/${label}`,
+            value: 0,
+            currency: "UAH",
+          });
+        }
+      } catch {}
     } catch {
       alert(lang === "uk" ? "Сталася помилка під час відправки заявки. Спробуйте ще раз пізніше." : "Произошла ошибка при отправке заявки. Попробуйте ещё раз чуть позже.");
     }
