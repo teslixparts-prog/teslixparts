@@ -55,14 +55,54 @@ export default function AdminPage() {
         throw new Error(lang === "uk" ? "Невірний пароль" : "Неверный пароль");
       }
 
-      setAuthed(true);
+      // persist for 30 days
+      try {
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem("teslix_admin_key", loginPassword);
+          document.cookie = `teslix_admin_key=${encodeURIComponent(loginPassword)}; Max-Age=${30 * 24 * 60 * 60}; Path=/; SameSite=Lax`;
+        }
+      } catch {}
+
       setAdminKey(loginPassword);
+      setAuthed(true);
       setMessage(lang === "uk" ? "Вхід виконано, можна додавати товари" : "Вход выполнен, можно добавлять товары");
     } catch (err: any) {
       setError(err.message || (lang === "uk" ? "Помилка авторизації" : "Ошибка авторизации"));
     } finally {
       setLoading(false);
     }
+  };
+
+  // try restore session on mount
+  useEffect(() => {
+    if (authed) return;
+    try {
+      if (typeof window === "undefined") return;
+      const fromLs = window.localStorage.getItem("teslix_admin_key");
+      let fromCookie = "";
+      const m = document.cookie.match(/(?:^|; )teslix_admin_key=([^;]+)/);
+      if (m) fromCookie = decodeURIComponent(m[1]);
+      const key = fromLs || fromCookie;
+      if (key) {
+        setAdminKey(key);
+        setAuthed(true);
+        setMessage(lang === "uk" ? "Відновлено сесію адміністратора" : "Сессия администратора восстановлена");
+      }
+    } catch {}
+  }, [authed, lang]);
+
+  const onLogout = () => {
+    try {
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem("teslix_admin_key");
+        window.localStorage.removeItem("teslix_admin_auth");
+        document.cookie = "teslix_admin_key=; Max-Age=0; Path=/; SameSite=Lax";
+        document.cookie = "teslix_admin_auth=; Max-Age=0; Path=/; SameSite=Lax";
+      }
+    } catch {}
+    setAdminKey("");
+    setAuthed(false);
+    setMessage(null);
   };
 
   useEffect(() => {
@@ -408,7 +448,16 @@ export default function AdminPage() {
           </form>
         ) : (
           <form onSubmit={onSubmit} className="mt-6 space-y-4 text-sm">
-            <p className="text-xs text-emerald-400">{t.youAreAuthed}</p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-emerald-400">{t.youAreAuthed}</p>
+              <button
+                type="button"
+                onClick={onLogout}
+                className="rounded-full border border-zinc-700 px-3 py-1 text-xs text-zinc-300 hover:bg-zinc-900"
+              >
+                Выйти
+              </button>
+            </div>
 
             <div>
               <label className="block text-xs text-zinc-400">{t.name}</label>
