@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "@/components/LanguageContext";
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
           heroSubtitle: "Запчастини для Tesla. Швидко. Надійно.",
           modelsTitle: "Вибір моделі",
           modelsDescription: "Спочатку оберіть модель Tesla, потім переходьте до каталогу запчастин.",
+          workTitle: "Наша робота зсередини",
           vinTitle: "Підбір запчастин за VIN",
           vinDescription:
             "Надішліть нам VIN вашого авто і коротко опишіть, які деталі потрібні. Ми підберемо сумісні запчастини під вашу комплектацію і надішлемо варіанти з цінами та фото.",
@@ -32,6 +34,7 @@ export default function Home() {
           heroSubtitle: "Запчасти для Tesla. Быстро. Надёжно.",
           modelsTitle: "Выбор модели",
           modelsDescription: "Сначала выберите модель Tesla, затем переходите к каталогу запчастей.",
+          workTitle: "Наша работа изнутри",
           vinTitle: "Подбор запчастей по VIN",
           vinDescription:
             "Отправьте нам VIN вашего авто и кратко опишите, какие детали нужны. Мы подберём совместимые запчасти под вашу комплектацию и отправим варианты с ценами и фото.",
@@ -47,6 +50,43 @@ export default function Home() {
           vinButton: "Оставить заявку на подбор",
           catalogButton: "Перейти в каталог",
         };
+  // Work photos state
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/work-photos")
+      .then((r) => r.json())
+      .then((d) => {
+        if (!active) return;
+        const arr = Array.isArray(d?.photos) ? d.photos : [];
+        setPhotos(arr);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // autoplay
+  useEffect(() => {
+    if (photos.length <= 1) return;
+    const id = setInterval(() => {
+      setIdx((i) => (i + 1) % photos.length);
+    }, 3000);
+    return () => clearInterval(id);
+  }, [photos.length]);
+
+  const ordered = useMemo(() => {
+    if (!photos.length) return [] as string[];
+    const res = [photos[idx]];
+    // pick prev and next if exist
+    const prev = photos[(idx - 1 + photos.length) % photos.length];
+    const next = photos[(idx + 1) % photos.length];
+    return [prev, photos[idx], next];
+  }, [photos, idx]);
+
   return (
     <div className="text-zinc-50">
       <main className="mx-auto max-w-5xl px-6 py-16">
@@ -99,6 +139,35 @@ export default function Home() {
             ))}
           </div>
         </section>
+
+        {photos.length > 0 && (
+          <section className="mt-16">
+            <h2 className="text-2xl font-semibold">{t.workTitle}</h2>
+            <div className="relative mt-6 overflow-hidden">
+              <div className="flex items-center justify-center gap-4">
+                {ordered.map((src, i) => (
+                  <div
+                    key={src + i}
+                    className={`relative h-64 w-full max-w-sm overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/50 ${
+                      i === 1 ? "opacity-100" : "opacity-40"
+                    }`}
+                  >
+                    <Image
+                      src={src}
+                      alt="work"
+                      fill
+                      sizes="(max-width: 768px) 90vw, 33vw"
+                      className={`object-cover transition-transform duration-700 ${
+                        i === 1 ? "scale-100" : "scale-95"
+                      }`}
+                      priority={i === 1}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className="mt-16 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-6">
           <h2 className="text-2xl font-semibold">{t.vinTitle}</h2>
