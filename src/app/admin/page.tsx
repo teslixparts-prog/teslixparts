@@ -687,22 +687,26 @@ export default function AdminPage() {
                             <button
                               type="button"
                               onClick={async () => {
-                                const val = Number(editPrice);
-                                if (Number.isNaN(val) || val < 0) {
+                                const cleaned = (editPrice || "").replace(/[\s,]/g, "");
+                                const hasPrice = cleaned !== "";
+                                const val = hasPrice ? Number(cleaned) : undefined;
+                                if (hasPrice && (Number.isNaN(val as number) || (val as number) < 0)) {
                                   alert(lang === "uk" ? "Некоректна ціна" : "Некорректная цена");
                                   return;
                                 }
                                 try {
+                                  const payload: any = { id: p.id, availability: editAvailability };
+                                  if (hasPrice) payload.price = Math.round(val as number);
                                   const res = await fetch(`/api/admin/products`, {
                                     method: "PATCH",
                                     headers: { "x-admin-key": adminKey, "Content-Type": "application/json" },
-                                    body: JSON.stringify({ id: p.id, price: val, availability: editAvailability }),
+                                    body: JSON.stringify(payload),
                                   });
                                   if (!res.ok && res.status !== 204) {
                                     const data = await res.json().catch(() => ({}));
                                     throw new Error(data?.error || (lang === "uk" ? "Помилка збереження" : "Ошибка сохранения"));
                                   }
-                                  setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, price: val, availability: editAvailability } : x)));
+                                  setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, price: hasPrice ? Math.round(val as number) : x.price, availability: editAvailability } : x)));
                                   setEditId(null);
                                   setEditPrice("");
                                   setEditAvailability("В наличии");
@@ -792,6 +796,7 @@ export default function AdminPage() {
                                 const data = await res.json().catch(() => ({}));
                                 throw new Error(data?.error || (lang === "uk" ? "Помилка відновлення" : "Ошибка восстановления"));
                               }
+                              setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, availability: "В наличии" } : x)));
                               alert(lang === "uk" ? "Відновлено у каталозі" : "Восстановлено в каталоге");
                             } catch (err: any) {
                               alert(err?.message || (lang === "uk" ? "Помилка відновлення" : "Ошибка восстановления"));

@@ -14,6 +14,7 @@ export default function AdminLoginPage() {
     if (login === "admin" && password === "privat24old") {
       if (typeof window !== "undefined") {
         localStorage.setItem("teslix_admin_auth", "1");
+        document.cookie = `teslix_admin_auth=1; Max-Age=${30 * 24 * 60 * 60}; Path=/; SameSite=Lax`;
       }
       router.push("/admin/add-product");
     } else {
