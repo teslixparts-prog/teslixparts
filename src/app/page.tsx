@@ -195,7 +195,7 @@ export default function Home() {
 
         {photos.length > 0 && (
           <section className="mt-12">
-            <h2 className="text-2xl font-semibold">{t.workTitle}</h2>
+            <h2 className="text-2xl font-semibold uppercase">{t.workTitle}</h2>
             <div className="relative mt-6 overflow-hidden">
               <div className="flex items-center justify-center gap-4">
                 {ordered.map((src, i) => (
@@ -204,7 +204,7 @@ export default function Home() {
                     className={`relative overflow-hidden rounded-2xl border border-zinc-700/60 bg-zinc-900/30 ring-1 ring-white/5 ${
                       i === 1
                         ? "h-44 w-72 sm:h-56 sm:w-96 opacity-100"
-                        : "h-28 w-40 sm:h-44 sm:w-64 opacity-20 blur-md"
+                        : "h-28 w-40 sm:h-44 sm:w-64 opacity-40 blur-md"
                     }`}
                   >
                     <Image
