@@ -74,7 +74,7 @@ export default function Home() {
     if (photos.length <= 1) return;
     const id = setInterval(() => {
       setIdx((i) => (i + 1) % photos.length);
-    }, 3000);
+    }, 4500);
     return () => clearInterval(id);
   }, [photos.length]);
 
@@ -140,35 +140,6 @@ export default function Home() {
           </div>
         </section>
 
-        {photos.length > 0 && (
-          <section className="mt-16">
-            <h2 className="text-2xl font-semibold">{t.workTitle}</h2>
-            <div className="relative mt-6 overflow-hidden">
-              <div className="flex items-center justify-center gap-4">
-                {ordered.map((src, i) => (
-                  <div
-                    key={src + i}
-                    className={`relative h-64 w-full max-w-sm overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/50 ${
-                      i === 1 ? "opacity-100" : "opacity-40"
-                    }`}
-                  >
-                    <Image
-                      src={src}
-                      alt="work"
-                      fill
-                      sizes="(max-width: 768px) 90vw, 33vw"
-                      className={`object-cover transition-transform duration-700 ${
-                        i === 1 ? "scale-100" : "scale-95"
-                      }`}
-                      priority={i === 1}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
         <section className="mt-16 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-6">
           <h2 className="text-2xl font-semibold">{t.vinTitle}</h2>
           <p className="mt-3 max-w-2xl text-sm text-zinc-300">
@@ -221,6 +192,37 @@ export default function Home() {
             </Link>
           </div>
         </section>
+
+        {photos.length > 0 && (
+          <section className="mt-12">
+            <h2 className="text-2xl font-semibold">{t.workTitle}</h2>
+            <div className="relative mt-6 overflow-hidden">
+              <div className="flex items-center justify-center gap-4">
+                {ordered.map((src, i) => (
+                  <div
+                    key={src + i}
+                    className={`relative overflow-hidden rounded-2xl border border-zinc-700/60 bg-zinc-900/30 ring-1 ring-white/5 ${
+                      i === 1
+                        ? "h-44 w-72 sm:h-56 sm:w-96 opacity-100"
+                        : "h-28 w-40 sm:h-44 sm:w-64 opacity-20 blur-md"
+                    }`}
+                  >
+                    <Image
+                      src={src}
+                      alt="work"
+                      fill
+                      sizes="(max-width: 768px) 90vw, 33vw"
+                      className={`object-cover transition-transform duration-1200 ${
+                        i === 1 ? "scale-100" : "scale-95"
+                      }`}
+                      priority={i === 1}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );
